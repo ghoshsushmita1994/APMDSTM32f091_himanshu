@@ -28,7 +28,7 @@
 #include "stdio.h"
 #include "string.h"
 
-extern UART_HandleTypeDef huart5;
+
 
 void bufclr (char *buf)
 {
@@ -69,13 +69,13 @@ void ESP_Init (void)		//char *SSID, char *PASSWD) // other than IIT_IOT network 
 
 	Uart_flush();
 
+
 	/******** AT+CWMODE=1 *********/
 
 	Uart_sendstring("AT+CWMODE=1\r\n");
-//	while (!(Wait_for("OK\r\n")));	// Function changed - Himanshu
+//	while (!(Wait_for("OK\r\n")));
 
 	Uart_flush();
-//	HAL_Delay(10000);
 
 /**********For IIT_IOT WIFI need not to use this command*****/
 /*
@@ -91,6 +91,7 @@ void ESP_Init (void)		//char *SSID, char *PASSWD) // other than IIT_IOT network 
 	/********* AT+CIPMUX=0 **********/
 	Uart_sendstring("AT+CIPMUX=0\r\n");
 
+
 	Uart_flush();
 }
 
@@ -103,10 +104,14 @@ void ESP_Init (void)		//char *SSID, char *PASSWD) // other than IIT_IOT network 
  */
 void ESP_Send_Data ( float value[])
 {
-	char local_buf[16] = {0};
-	char cmd_buf[30] = {0};
+	char local_buf[900] = {0};
+	char local_buf2[30] = {0};
 	char buf2send[128] = {0};
 	int i=0;
+
+	Uart_sendstring("AT+CIPSTART=\"TCP\",\"10.17.10.11\",12000\r\n");
+
+	HAL_Delay(500);
 
 	/*************Used when data is sending to ThingSpeak*********/
 //	while (!(Wait_for("OK\r\n")));
@@ -114,45 +119,38 @@ void ESP_Send_Data ( float value[])
 	/*sprintf (local_buf, "GET /update?api_key=%s&field%d=%u\r\n", APIkey, Field_num, value);
 	int len = strlen (local_buf);
 
-	sprintf (cmd_buf, "AT+CIPSEND=%d\r\n", len);
-	Uart_sendstring(cmd_buf);
+	sprintf (local_buf2, "AT+CIPSEND=%d\r\n", len);
+	Uart_sendstring(local_buf2);
 	 */
 
+
+
 	int len = 0;
-	for( i=0; i<11; i++)
+	for( i=0;	i<11; i++)
 	{
 		len += sprintf(local_buf, "%.4f,", value[i]);
 		strcat(buf2send, local_buf);
 
 	}
-
-	Uart_sendstring("AT+CIPSTART=\"TCP\",\"10.17.10.11\",12000\r\n");
-	HAL_Delay(500);
-
-	printf("\r\n\r\nConnected.\r\nData : %s", (char *)buf2send);
-
-	sprintf (cmd_buf, "AT+CIPSEND=%d\r\n", len);
-	printf("\r\n%s\r\n", (char *)cmd_buf);
-	Uart_sendstring(cmd_buf);
+	printf(buf2send);
+	sprintf (local_buf2, "AT+CIPSEND=%d\r\n", len);
+	Uart_sendstring(local_buf2);
+	printf(local_buf2);
 	Uart_sendstring(buf2send);
 
-//	Uart_sendstring("AT+CIPSEND=4\r\n");
-//	Uart_sendstring("ok\r\n");
-//	char pData[10] = {0};
-//	HAL_UART_Transmit(&huart5, (uint8_t *)"AT\r\n", sizeof("AT\r\n"), 100);
-//	HAL_UART_Receive(&huart5, (uint8_t *)pData, 10, 1000);
-//	printf("Received : %s\r\n", pData);
+
+
 
 	HAL_Delay(500);
 
-	//Uart_sendstring("AT+CIPCLOSE\r\n");
+
+//	Uart_sendstring("AT+CIPCLOSE\r\n");
 	bufclr(local_buf);
-	bufclr(cmd_buf);
+	bufclr(local_buf2);
 
 	Ringbuf_init();
 
 }
-
 
 /*********************************************************************
  * 			ESP_Send_Multi (uint16_t value[])
@@ -168,7 +166,7 @@ void ESP_Send_Multi (uint16_t value[])
 
 
 	Uart_sendstring("AT+CIPSTART=\"TCP\",\"10.17.10.11\",12000\r\n");
-//	while (!(Wait_for("OK\r\n")));
+	while (!(Wait_for("OK\r\n")));
 
 
 	/*sprintf (local_buf, "GET /update?api_key=%s", APIkey);
@@ -194,5 +192,3 @@ void ESP_Send_Multi (uint16_t value[])
 	Ringbuf_init();
 
 }
-
-

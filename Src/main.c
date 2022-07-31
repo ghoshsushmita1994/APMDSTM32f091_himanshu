@@ -52,7 +52,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define n_PARAMS 11
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -90,7 +90,7 @@ float Temperature = 0;
 float Humidity = 0;
 uint8_t Presence = 0;
 
-float buffer[n_PARAMS];
+float buffer[8];
 
 ADC_ChannelConfTypeDef sConfig;
 
@@ -101,15 +101,14 @@ float PM1,PM2,PM3,PM4,PM5;
 #define MDM_1V8 GPIO_PIN_15
 #define PORTA GPIOA
 #define MDM_PWR GPIO_PIN_8
-#define PCON_PM GPIO_PIN_15
 #define PORTC GPIOC
 #define PCON_DHT GPIO_PIN_6
 #define PCON_AFE2 GPIO_PIN_7
 #define PCON_AFE1 GPIO_PIN_8
 #define PCON_FAN GPIO_PIN_9
+#define PORTA GPIOA
+#define PCON_PM GPIO_PIN_15
 #define ESP_CH_EN GPIO_PIN_11
-
-
 
 /***************************
  * printf() Function
@@ -134,7 +133,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 //	char str[15];
-//	int sample_count = 1;
+	int sample_count = 1;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -163,13 +162,14 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  //HAL_GPIO_WritePin(GPIOC, PCON_AFE1, GPIO_PIN_RESET);
-  //HAL_GPIO_WritePin(GPIOC, ESP_CH_EN, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, PCON_AFE1, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, ESP_CH_EN, GPIO_PIN_SET);
 
-//  HAL_Delay(100);
+  HAL_Delay(100);
   HAL_UART_Transmit(&huart3, (uint8_t*)"Here1", sizeof("Here1"), HAL_MAX_DELAY);
-////  ESP_RST();
-//  ESP_Init();
+
+//  ESP_RST();
+  ESP_Init();
 
   HAL_TIM_Base_Start(&htim16);
 
@@ -188,20 +188,9 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOC, PCON_DHT, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOC, PCON_AFE1, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOA, PCON_PM, GPIO_PIN_SET);
-
 	HAL_GPIO_WritePin(GPIOC, ESP_CH_EN, GPIO_PIN_SET);
 	HAL_Delay(5000);
-	//HAL_UART_Transmit(&huart3, (uint8_t*)"Here1", sizeof("Here1"), HAL_MAX_DELAY);
-	HAL_Delay(100);
 
-
-
-	float a = 0.00; float b = 0.00; float c = 0.00; float d = 0.00; float e = 0.00; float f = 0.00;
-	float p1 = 0.00; float p2 = 0.00; float p3 = 0.00; float p4 = 0.00; float p5 = 0.00;
-
-    uint8_t k;
-    for (k=0; k<1; k++)	// 5
-    {
 
 	/****************************  DHT Data Read *****************************************/
 
@@ -217,119 +206,99 @@ int main(void)
   	RH = Rh_byte1;
 
   	Temperature = (float) TEMP;
-  	a=a+Temperature;
   	Humidity = (float) RH;
-  	b=b+Humidity;
+
+
+  	Temperature = (float) TEMP;
   	printf("Temperature: %f \r\n", Temperature);
+
+	Humidity = (float) RH;
 	printf("Humidity: %f \r\n",	Humidity);
 
 
+
 	/*************************** Gas Sensor Data Read *******************************/
+
 
 	float N02_value =  NO2_Read(TEMP);					//NO2_read_value; 		//ppb value
 	float NO2_1= N02_value*1.88;						//ug/m^3 value
-	c=c+NO2_1;
 	printf("NO2 value in ug/m^3: %.4f\r\n", NO2_1);
+
 
 	float OX_value =  OX_Read(TEMP); 					//ppb value
 	float OX_1= OX_value*2.00;							//ug/m^3 value
-	d=d+OX_1;
 	printf("OX value in ug/m^3: %.4f \r\n" ,OX_1);
+
 
 	float CO_value =  CO_Read(TEMP); 					//ppb value
 	float CO_1= CO_value*1.145;							//ug/m^3 value
-	e=e+CO_1;
-	printf("CO value in mg/m^3 %.4f \r\n" ,CO_1);
+	printf("CO value in ug/m^3 %.4f \r\n" ,CO_1);
 
 	float SO2_value = SO2_Read(TEMP); 					//ppb value
 	float SO2_1= SO2_value*2.62;						//ug/m^3 value
-	f=f+SO2_1;
 	printf("SO2 value in ug/m^3: %.4f \r\n" ,SO2_1);
 
 
-	/*************************** Gas Sensor Data Read *******************************/
-
 	PM_Read(&PM1, &PM2, &PM3, &PM4, &PM5);
-	p1=p1+PM1; p2=p2+PM2; p3=p3+PM3; p4=p4+PM4; p5=p5+PM5;
 	printf("PM1= %f\r\n", PM1);
 	printf("PM2= %f\r\n", PM2);
-	printf("PM3= %f\r\n", PM3);
-	printf("PM4= %f\r\n", PM4);
-	printf("PM5= %f\r\n", PM5);
+	printf("PM2= %f\r\n", PM3);
+	printf("PM2= %f\r\n", PM4);
+	printf("PM2= %f\r\n", PM5);
 	HAL_Delay(1000);
-
-    }
-
-    a=a/5; b=b/5; c=c/5; d=d/5; e=e/5; f=f/5; p1=p1/5; p2=p2/5; p3=p3/5; p4=p4/5; p5=p5/5;
-    a=0.45*a+19; b=0.813*b+0.99;
-    //g1=0.0022*g*g-2.54*g+762.2;
-    //h1=1.9*g+9.82;
 
 
 
 	/**************** Sending Data to ThingsSpeak ********************************/
 
-//	buffer[0]= 	Temperature;
-//	buffer[1]=	Humidity;
-//	buffer[2]=	NO2_1;
-//	buffer[3]=	OX_1;
-//	buffer[4]=	CO_1;
-//	buffer[5]=	SO2_1;
-//	buffer[6]=	PM1;
-//	buffer[7]=	PM2;
-//	buffer[8]=	PM3;
-//	buffer[9]=	PM4;
-//	buffer[10]=	PM5;
-
-	buffer[0]= 	a;
-	buffer[1]=	b;
-	buffer[2]=	c;
-	buffer[3]=	d;
-	buffer[4]=	e;
-	buffer[5]=	f;
-	buffer[6]=	p1;
-	buffer[7]=	p2;
-	buffer[8]=	p3;
-	buffer[9]=	p4;
-	buffer[10]=	p5;
-
-
-	ESP_Init();
-	HAL_Delay(2000);
-//	printf("Here\r\n");
+	buffer[0]= 	Temperature;
+	buffer[1]=	Humidity;
+	buffer[2]=	NO2_1;
+	buffer[3]=	OX_1;
+	buffer[4]=	CO_1;
+	buffer[5]=	SO2_1;
+	buffer[6]=	PM1;
+	buffer[7]=	PM2;
+	buffer[8]=	PM3;
+	buffer[9]=	PM4;
+	buffer[10]=	PM5;
 
 	ESP_Send_Data(buffer);
 
 	HAL_Delay(2000);
 
 
-	//sample_count++;
+	sample_count++;
 
 
 	/************* After 5 sample has been transfer to ThinkSpeak,
 	 * Microcontroller will sleep for 3 Minute*********/
 
-	//if (sample_count > 5)
-	//{
+	if (sample_count > 5)
+	{
 
 
 		/******* Powering Off the sensor ****************/
 		HAL_GPIO_WritePin(GPIOC, PCON_DHT, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOC, PCON_AFE1, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(GPIOA, PCON_PM, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOC, ESP_CH_EN, GPIO_PIN_RESET);
-
-		HAL_Delay(30000); 		//4 Minute
-
-		//sample_count =	1;
 
 
-	//}
+		HAL_Delay(20000); 		//3 Minute
+
+		sample_count =	1;
 
 
- }  /*while loop end*/
+	}
 
-}   /*main loop end*/
+ }
+  /* USER CODE END 3 */
+}
+
+
+
+
+
 
 
 

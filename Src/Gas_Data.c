@@ -534,11 +534,11 @@ void PM_Read(float *PM1, float *PM2,float *PM3, float *PM4,float *PM5 )
 		bin = (500*(Vadc2/1024));          // bin = 0 -- noise; 1<= bin <=3 -- PM1; 1<= bin <=9 -- PM2.5; 1<= bin <=10 -- PM10
 		if (bin > 0)
 		{
-		if (bin < 10)  P1=P1+1;
-		if (bin < 25)  P2=P2+1;
-		if (bin < 50)  P3=P3+1;
-		if (bin < 100)  P4=P4+1;  //threshold for pm2.5
-		if (bin < 200)  P5=P5+1;
+		if (bin < 5)  P1=P1+1;
+		if (bin < 10)  P2=P2+1;
+		if (bin < 25)  P3=P3+1;
+		if (bin < 50)  P4=P4+1;
+		if (bin < 100)  P5=P5+1;
 		//if (bin < 200)  P6=P6+1;
 		//if (bin < 150)  P7=P7+1;
 		//if (bin < 200)  P8=P8+1;

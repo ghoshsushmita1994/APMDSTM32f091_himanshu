@@ -117,7 +117,3 @@ uint8_t DHT11_Read (void)
 	}
 	return i;
 }
-
-
-
-

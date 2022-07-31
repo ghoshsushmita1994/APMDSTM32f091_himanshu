@@ -9,7 +9,6 @@
 
 #include "UartRingbuffer.h"
 #include <string.h>
-#include "stdio.h"
 
 /**** define the UART you are using  ****/
 
@@ -131,8 +130,7 @@ void Uart_write(int c)
 		// If the output buffer is full, there's nothing for it other than to
 		// wait for the interrupt handler to empty it a bit
 		// ???: return 0 here instead?
-//		if(i == _tx_buffer->tail) printf("Tx Buffer Full.\r\n");		// Himanshu - added
-		while (i == _tx_buffer->tail) {};
+		while (i == _tx_buffer->tail);
 
 		_tx_buffer->buffer[_tx_buffer->head] = (uint8_t)c;
 		_tx_buffer->head = i;
@@ -237,23 +235,9 @@ int Get_after (char *string, uint8_t numberofchars, char *buffertosave)
 
 int Wait_for (char *string)
 {
-	// Himanshu - added
-//	char * p = strstr((const char *)_rx_buffer->buffer, string);
-//	if(p == NULL && _rx_buffer->tail != 0U)
-//	{
-//		char buf[512] = {0};
-//		strcpy(buf, (const char *)&_rx_buffer->buffer[_rx_buffer->tail]);	// TODO make sure it doesn't overflow the _rx_buffer->buffer due to absence of null ptr at end.
-//		if(_rx_buffer->head < _rx_buffer->tail)
-//			strcat(buf, (const char *)_rx_buffer->buffer);
-//		p = strstr(buf, string);
-//	}
-//
-//	if(p == NULL)
-//		return -1;
-//	return 1;
-
 	int so_far =0;
 	int len = strlen (string);
+
 again:
 	while (!IsDataAvailable());
 	if (Uart_peek() != string[so_far])
